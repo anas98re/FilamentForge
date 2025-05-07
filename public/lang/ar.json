@@ -11,5 +11,13 @@
     "View 360 Assessments Content": "محتوى عرض تقييمات 360",
     "Content for View 360 Assessments tab.": "محتوى لسان عرض تقييمات 360.",
     "Total Invitations Summary Content": "محتوى ملخص إجمالي الدعوات",
-    "Content for Total Invitations Summary tab.": "محتوى لسان ملخص إجمالي الدعوات."
+    "Content for Total Invitations Summary tab.": "محتوى لسان ملخص إجمالي الدعوات.",
+    "Sent Invitations": "الدعوات المرسلة",
+    "Send Invitation": "إرسال دعوة",
+    "No invitations sent yet for this group.": "لم يتم إرسال دعوات لهذه المجموعة بعد.",
+    "No invitation groups found. Please add some groups first.": "لم يتم العثور على مجموعات دعوات. يرجى إضافة بعض المجموعات أولاً.",
+    "Send Invitation for": "إرسال دعوة لـ",
+    "Recipient Email Address": "عنوان البريد الإلكتروني للمستلم",
+    "Send": "إرسال",
+    "Cancel": "إلغاء"
 }

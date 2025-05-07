@@ -15,4 +15,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
+
+Route::get('/survey-placeholder/{token}', function ($token) {
+    return "This is a placeholder for the survey with token: " . $token;
+})->name('survey.show');

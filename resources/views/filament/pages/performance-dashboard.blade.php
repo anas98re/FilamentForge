@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     {{-- مكون الألسنة من Filament --}}
     <x-filament::tabs>
-        {{-- المرور على الألسنة المعرفة في ميثود getPageTabs() --}}
+        {{-- المرور على الألسنة المعرفة في ميثود getPageTabs() في كلاس الصفحة --}}
         @foreach ($this->getPageTabs() as $tabId => $tabConfig)
             <x-filament::tabs.item
                 :active="$activeTab === $tabId"  {{-- تحديد ما إذا كان اللسان الحالي هو النشط --}}
@@ -15,31 +15,40 @@
     </x-filament::tabs>
 
     {{-- عرض المحتوى بناءً على اللسان النشط ($activeTab) --}}
-    <div class="mt-6"> {{-- إضافة بعض التباعد العلوي --}}
+    <div class="mt-6"> {{-- إضافة بعض التباعد العلوي للمحتوى --}}
+
+        {{-- محتوى لسان إدارة الدعوات --}}
         @if ($activeTab === 'invitations_management')
             <div>
-                {{-- محتوى لسان "إدارة الدعوات" --}}
-                {{-- في الخطوة التالية، سنضع هنا مكون Livewire @livewire('invitation-manager') --}}
-                <h2 class="text-xl font-semibold mb-4">{{ __('Invitations Management') }}</h2>
-                <p>{{ __('This is where the invitations management functionality will be implemented.') }}</p>
+                {{-- هنا يتم تضمين مكون Livewire لإدارة الدعوات --}}
+                @livewire('invitation-manager')
             </div>
-        @elseif ($activeTab === '360_assessments')
+        @endif
+
+        {{-- محتوى لسان تقييمات 360 --}}
+        @if ($activeTab === '360_assessments')
             <div>
-                {{-- محتوى لسان "تقييمات 360" --}}
                 <h2 class="text-xl font-semibold mb-4">{{ __('360 Assessments') }}</h2>
                 <p>{{ __('Content for 360 Assessments tab.') }}</p>
+                {{-- يمكنك إضافة المزيد من المحتوى أو مكونات Livewire أخرى هنا --}}
             </div>
-        @elseif ($activeTab === 'view_360_assessments')
+        @endif
+
+        {{-- محتوى لسان عرض تقييمات 360 --}}
+        @if ($activeTab === 'view_360_assessments')
             <div>
-                {{-- محتوى لسان "عرض تقييمات 360" --}}
                 <h2 class="text-xl font-semibold mb-4">{{ __('View 360 Assessments') }}</h2>
                 <p>{{ __('Content for View 360 Assessments tab.') }}</p>
+                {{-- يمكنك إضافة المزيد من المحتوى أو مكونات Livewire أخرى هنا --}}
             </div>
-        @elseif ($activeTab === 'total_invitations_summary')
+        @endif
+
+        {{-- محتوى لسان ملخص إجمالي الدعوات --}}
+        @if ($activeTab === 'total_invitations_summary')
             <div>
-                {{-- محتوى لسان "ملخص إجمالي الدعوات" --}}
                 <h2 class="text-xl font-semibold mb-4">{{ __('Total Invitations Summary') }}</h2>
                 <p>{{ __('Content for Total Invitations Summary tab.') }}</p>
+                {{-- يمكنك إضافة المزيد من المحتوى أو مكونات Livewire أخرى هنا --}}
             </div>
         @endif
     </div>

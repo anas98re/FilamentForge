@@ -1,11 +1,19 @@
 {
-    "Performance Dashboard": "لوحة قيادة الأداء",
-    "Invitations Management": "إدارة الدعوات",
-    "360 Assessments": "تقييمات 360",
-    "View 360 Assessments": "عرض تقييمات 360",
-    "Total Invitations Summary": "ملخص إجمالي الدعوات",
-    "This is where the invitations management functionality will be implemented.": "هنا سيتم تنفيذ وظيفة إدارة الدعوات.",
-    "Content for 360 Assessments tab.": "محتوى لسان تقييمات 360.",
-    "Content for View 360 Assessments tab.": "محتوى لسان عرض تقييمات 360.",
-    "Content for Total Invitations Summary tab.": "محتوى لسان ملخص إجمالي الدعوات."
+    "Performance Dashboard": "Performance Dashboard",
+    "Invitations Management": "Invitations Management",
+    "360 Assessments": "360 Assessments",
+    "View 360 Assessments": "View 360 Assessments",
+    "Total Invitations Summary": "Total Invitations Summary",
+    "This is where the invitations management functionality will be implemented.": "This is where the invitations management functionality will be implemented.",
+    "Content for 360 Assessments tab.": "Content for 360 Assessments tab.",
+    "Content for View 360 Assessments tab.": "Content for View 360 Assessments tab.",
+    "Content for Total Invitations Summary tab.": "Content for Total Invitations Summary tab.",
+    "Sent Invitations": "Sent Invitations",
+    "Send Invitation": "Send Invitation",
+    "No invitations sent yet for this group.": "No invitations sent yet for this group.",
+    "No invitation groups found. Please add some groups first.": "No invitation groups found. Please add some groups first.",
+    "Send Invitation for": "Send Invitation for",
+    "Recipient Email Address": "Recipient Email Address",
+    "Send": "Send",
+    "Cancel": "Cancel"
 }
