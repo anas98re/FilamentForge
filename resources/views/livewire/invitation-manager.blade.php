@@ -1,5 +1,5 @@
 <div>
-    {{-- عرض رسائل النجاح أو الخطأ من Session Flash (يمكن استبدالها أو دمجها مع إشعارات Filament) --}}
+    {{-- Display success or error messages from Session Flash  --}}
     @if (session()->has('message'))
         <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
             {{ session('message') }}
@@ -13,7 +13,7 @@
 
     <div class="space-y-6">
         @forelse ($invitationGroups as $group)
-            <div class="p-6 bg-white shadow rounded-lg ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"> {{-- استخدام كلاسات Filament Card القياسية --}}
+            <div class="p-6 bg-white shadow rounded-lg ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"> {{-- Using standard Filament Card classes --}}
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ $group->name }}</h3>
@@ -21,13 +21,13 @@
                             {{ __('Sent Invitations') }}: {{ $group->invitations_count ?? 0 }}
                         </p>
                     </div>
-                    {{-- زر Filament --}}
+                    {{-- Filament Button --}}
                     <x-filament::button wire:click="openSendInvitationModal({{ $group->id }})">
                         {{ __('Send Invitation') }}
                     </x-filament::button>
                 </div>
 
-                {{-- قسم لعرض الدعوات المرسلة لهذه المجموعة --}}
+                {{-- Section to display sent invitations for this group --}}
                 <div class="mt-4">
                     @if ($group->invitations->isNotEmpty())
                         <ul class="divide-y divide-gray-200 dark:divide-white/10">
@@ -68,17 +68,16 @@
         @empty
             <div class="p-6 bg-white shadow rounded-lg ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10 text-center">
                 <p class="text-gray-500 dark:text-gray-400">{{ __('No invitation groups found. Please add some groups first.') }}</p>
-                {{-- يمكنك إضافة زر لإنشاء مجموعات هنا إذا أردت --}}
             </div>
         @endforelse
     </div>
 
-    {{-- النافذة الحوارية لإرسال الدعوة --}}
+    {{-- Modal Dialog to send an invitation --}}
     @if ($showSendInvitationModal && $selectedGroup)
-    {{-- تم تعديل z-index هنا إلى z-[1000] --}}
+    {{-- z-index adjusted here to z-[1000] --}}
     <div class="fixed inset-0 z-[1000] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            {{-- خلفية النافذة --}}
+            {{-- Modal background overlay --}}
             <div
                 x-data
                 x-show="$wire.showSendInvitationModal"
@@ -88,15 +87,15 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"
-                class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity" {{-- استخدام كلاسات Filament للشفافية --}}
+                class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity" {{-- Using Filament classes for opacity --}}
                 wire:click="closeSendInvitationModal"
                 aria-hidden="true"
             ></div>
 
-            {{-- هذا العنصر يستخدم لمحاذاة النافذة عمودياً في الشاشات الكبيرة --}}
+            {{-- This element is to trick the browser into centering the modal contents. --}}
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">​</span>
 
-            {{-- محتوى النافذة الفعلي --}}
+            {{-- Actual modal content --}}
             <div
                 x-data
                 x-show="$wire.showSendInvitationModal"
@@ -106,15 +105,15 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="inline-block w-full max-w-lg transform overflow-hidden rounded-xl bg-white p-6 text-left align-bottom shadow-xl transition-all dark:bg-gray-800 sm:my-8 sm:align-middle" {{-- استخدام كلاسات Filament Modal --}}
+                class="inline-block w-full max-w-lg transform overflow-hidden rounded-xl bg-white p-6 text-left align-bottom shadow-xl transition-all dark:bg-gray-800 sm:my-8 sm:align-middle" {{-- Using Filament Modal classes --}}
             >
                 <div class="space-y-2">
                     <h3 class="text-xl font-medium leading-6 text-gray-900 dark:text-white" id="modal-title">
                         {{ __('Send Invitation for') }} {{ $selectedGroup->name }}
                     </h3>
-                    <div class="mt-4 space-y-1"> {{-- تقليل المسافة بين العنوان والحقل --}}
+                    <div class="mt-4 space-y-1"> {{-- Reducing space between title and field --}}
                         <label for="recipientEmailModal" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Recipient Email Address') }}</label>
-                        <x-filament::input.wrapper> {{-- استخدام Filament input wrapper --}}
+                        <x-filament::input.wrapper> {{-- Using Filament input wrapper --}}
                             <x-filament::input
                                 wire:model.defer="recipientEmail"
                                 type="email"
@@ -124,10 +123,10 @@
                                 required
                             />
                         </x-filament::input.wrapper>
-                        @error('recipientEmail') <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p> @enderror {{-- استخدام كلاسات Filament للخطأ --}}
+                        @error('recipientEmail') <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">{{ $message }}</p> @enderror {{-- Using Filament classes for error --}}
                     </div>
                 </div>
-                <div class="mt-5 sm:mt-6 filament-modal-actions"> {{-- استخدام كلاسات Filament لـ actions --}}
+                <div class="mt-5 sm:mt-6 filament-modal-actions"> {{-- Using Filament classes for actions --}}
                     <x-filament::button
                         wire:click="sendInvitation"
                         wire:loading.attr="disabled"
@@ -139,7 +138,7 @@
                     </x-filament::button>
                     <x-filament::button
                         wire:click="closeSendInvitationModal"
-                        color="gray" {{-- استخدام gray أو secondary --}}
+                        color="gray"
                         outlined
                     >
                         {{ __('Cancel') }}

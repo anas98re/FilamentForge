@@ -6,8 +6,6 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
-// يمكنك إضافة هذا إذا أردت تسجيل معلومات للتحقق لاحقاً
-// use Illuminate\Support\Facades\Log;
 
 class SetLocale
 {
@@ -24,7 +22,6 @@ class SetLocale
             if (array_key_exists($sessionLocale, $supportedLocalesConfig)) {
                 // إذا كانت مدعومة، قم بتعيينها كلغة للتطبيق
                 App::setLocale($sessionLocale);
-                // Log::info("Locale set from session: " . $sessionLocale); // للتحقق
             } else {
                 // إذا كانت اللغة في الجلسة غير مدعومة (نادر، لكن جيد التحقق)
                 // قم بتعيين اللغة الافتراضية وحدث الجلسة
@@ -40,7 +37,6 @@ class SetLocale
             // Log::info("No locale in session. Using default: " . $defaultLocale); // للتحقق
         }
 
-        // اسمح للطلب بالاستمرار
         return $next($request);
     }
 }

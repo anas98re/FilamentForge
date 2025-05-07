@@ -1,54 +1,54 @@
 <x-filament-panels::page>
-    {{-- مكون الألسنة من Filament --}}
+    {{-- Filament Tabs Component --}}
     <x-filament::tabs>
-        {{-- المرور على الألسنة المعرفة في ميثود getPageTabs() في كلاس الصفحة --}}
+        {{-- Loop through tabs defined in the getPageTabs() method in the Page class --}}
         @foreach ($this->getPageTabs() as $tabId => $tabConfig)
             <x-filament::tabs.item
-                :active="$activeTab === $tabId"  {{-- تحديد ما إذا كان اللسان الحالي هو النشط --}}
-                :icon="$tabConfig->getIcon()"  {{-- عرض الأيقونة المعرفة للسان --}}
-                wire:click="$set('activeTab', '{{ $tabId }}')" {{-- عند النقر، تحديث خاصية activeTab --}}
-                :badge="$tabConfig->getBadge()" {{-- عرض الشارة إذا كانت موجودة --}}
+                :active="$activeTab === $tabId"  {{-- Determine if the current tab is active --}}
+                :icon="$tabConfig->getIcon()"  {{-- Display the icon defined for the tab --}}
+                wire:click="$set('activeTab', '{{ $tabId }}')" {{-- On click, update the activeTab property --}}
+                :badge="$tabConfig->getBadge()" {{-- Display the badge if it exists --}}
             >
-                {{ $tabConfig->getLabel() }} {{-- عرض اسم اللسان --}}
+                {{ $tabConfig->getLabel() }} {{-- Display the tab label --}}
             </x-filament::tabs.item>
         @endforeach
     </x-filament::tabs>
 
-    {{-- عرض المحتوى بناءً على اللسان النشط ($activeTab) --}}
-    <div class="mt-6"> {{-- إضافة بعض التباعد العلوي للمحتوى --}}
+    {{-- Display content based on the active tab ($activeTab) --}}
+    <div class="mt-6"> {{-- Add some top margin for the content --}}
 
-        {{-- محتوى لسان إدارة الدعوات --}}
+        {{-- Invitations Management Tab Content --}}
         @if ($activeTab === 'invitations_management')
             <div>
-                {{-- هنا يتم تضمين مكون Livewire لإدارة الدعوات --}}
+                {{-- Livewire component for invitations management is included here --}}
                 @livewire('invitation-manager')
             </div>
         @endif
 
-        {{-- محتوى لسان تقييمات 360 --}}
+        {{-- 360 Assessments Tab Content --}}
         @if ($activeTab === '360_assessments')
             <div>
                 <h2 class="text-xl font-semibold mb-4">{{ __('360 Assessments') }}</h2>
                 <p>{{ __('Content for 360 Assessments tab.') }}</p>
-                {{-- يمكنك إضافة المزيد من المحتوى أو مكونات Livewire أخرى هنا --}}
+                {{-- You can add more content or other Livewire components here --}}
             </div>
         @endif
 
-        {{-- محتوى لسان عرض تقييمات 360 --}}
+        {{-- View 360 Assessments Tab Content --}}
         @if ($activeTab === 'view_360_assessments')
             <div>
                 <h2 class="text-xl font-semibold mb-4">{{ __('View 360 Assessments') }}</h2>
                 <p>{{ __('Content for View 360 Assessments tab.') }}</p>
-                {{-- يمكنك إضافة المزيد من المحتوى أو مكونات Livewire أخرى هنا --}}
+                {{-- You can add more content or other Livewire components here --}}
             </div>
         @endif
 
-        {{-- محتوى لسان ملخص إجمالي الدعوات --}}
+        {{-- Total Invitations Summary Tab Content --}}
         @if ($activeTab === 'total_invitations_summary')
             <div>
                 <h2 class="text-xl font-semibold mb-4">{{ __('Total Invitations Summary') }}</h2>
                 <p>{{ __('Content for Total Invitations Summary tab.') }}</p>
-                {{-- يمكنك إضافة المزيد من المحتوى أو مكونات Livewire أخرى هنا --}}
+                {{-- You can add more content or other Livewire components here --}}
             </div>
         @endif
     </div>

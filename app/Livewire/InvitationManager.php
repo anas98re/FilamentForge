@@ -5,50 +5,65 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\InvitationGroup;
 use App\Models\Invitation;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\PerformanceInvitationMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log; // For logging errors
 use Illuminate\Support\Str;
 use Filament\Notifications\Notification;
-// use Illuminate\Support\Facades\Log; // إذا أردت تسجيل الأخطاء
+use Exception; // For catching generic exceptions
 
 class InvitationManager extends Component
 {
+    // Number of recent invitations to display per group
+    protected const RECENT_INVITATIONS_LIMIT = 5;
+
     public $invitationGroups;
     public ?InvitationGroup $selectedGroup = null;
-    public $recipientEmail = '';
-    public $showSendInvitationModal = false;
+    public string $recipientEmail = '';
+    public bool $showSendInvitationModal = false;
 
-    public function mount()
+    /**
+     * Mount the component.
+     * Load initial data.
+     */
+    public function mount(): void
     {
         $this->loadInvitationGroups();
     }
 
-    public function loadInvitationGroups()
+    /**
+     * Load invitation groups with their invitation counts and recent invitations.
+     */
+    public function loadInvitationGroups(): void
     {
         $this->invitationGroups = InvitationGroup::withCount('invitations')
             ->with(['invitations' => function ($query) {
-                $query->latest()->take(5);
+                $query->latest()->take(self::RECENT_INVITATIONS_LIMIT);
             }])
             ->get();
     }
 
-    public function openSendInvitationModal(int $groupId)
+    /**
+     * Open the send invitation modal for a specific group.
+     * @param int $groupId The ID of the InvitationGroup.
+     */
+    public function openSendInvitationModal(int $groupId): void
     {
         $this->selectedGroup = InvitationGroup::find($groupId);
+
         if ($this->selectedGroup) {
             $this->recipientEmail = '';
-            $this->resetErrorBag(['recipientEmail']); // مسح أخطاء التحقق السابقة
+            $this->resetErrorBag(['recipientEmail']); // Clear previous validation errors
             $this->showSendInvitationModal = true;
         } else {
-            Notification::make()
-                ->title(__('Error'))
-                ->body(__('Invitation group not found.'))
-                ->danger()
-                ->send();
+            $this->notifyError(__('Error'), __('Invitation group not found.'));
         }
     }
 
-    public function closeSendInvitationModal()
+    /**
+     * Close the send invitation modal and reset its state.
+     */
+    public function closeSendInvitationModal(): void
     {
         $this->showSendInvitationModal = false;
         $this->selectedGroup = null;
@@ -56,76 +71,148 @@ class InvitationManager extends Component
         $this->resetErrorBag(['recipientEmail']);
     }
 
-    public function sendInvitation()
+    /**
+     * Validate input and orchestrate the invitation sending process.
+     */
+    public function sendInvitation(): void
     {
-        if (!$this->selectedGroup) { // تحقق إضافي هنا
-            Notification::make()
-                ->title(__('Error'))
-                ->body(__('No group selected or group not found.'))
-                ->danger()
-                ->send();
+        if (!$this->selectedGroup) {
+            $this->notifyError(__('Error'), __('No group selected or group not found.'));
             $this->closeSendInvitationModal();
             return;
         }
 
-        $validatedData = $this->validate([ // تخزين البيانات المتحقق منها
-            'recipientEmail' => 'required|email',
+        $validatedData = $this->validate([
+            'recipientEmail' => 'required|email|max:255', // Added max length
         ]);
 
-        $currentLocale = app()->getLocale(); // اللغة الحالية للتطبيق
+        $currentLocale = app()->getLocale();
+        $invitation = $this->_createPendingInvitation($validatedData['recipientEmail'], $currentLocale);
 
-        // 1. حفظ الدعوة في قاعدة البيانات
-        $invitation = Invitation::create([
-            'invitation_group_id' => $this->selectedGroup->id,
-            'email' => $validatedData['recipientEmail'], // استخدام القيمة المتحقق منها
-            'token' => Str::random(32),
-            'status' => 'pending', // نبدأ بـ pending، ثم نغيرها إلى sent أو failed
-            'language_code' => $currentLocale,
-            // 'sent_at' => now(), // سيتم تعيينه بعد الإرسال الناجح
-            // 'expires_at' => now()->addDays(7),
-        ]);
-
-        // 2. إرسال البريد الإلكتروني
-        $recipientName = $currentLocale === 'ar' ? 'عزيزي المستخدم' : 'Dear User'; // *** التصحيح هنا ***
-
-        // سنستخدم رابطًا وهميًا للاستبيان حاليًا
-        // تأكد من أن لديك route باسم 'home' أو غيّره
-        $surveyLink = route('survey.show', ['token' => $invitation->token]);
-
-
-        try {
-            Mail::to($validatedData['recipientEmail'])
-                ->locale($currentLocale) // مهم لـ Mailable
-                ->send(new PerformanceInvitationMail($invitation, $recipientName, $surveyLink, $currentLocale));
-
-            // تحديث حالة الدعوة إلى مرسلة وتسجيل وقت الإرسال
-            $invitation->update([
-                'status' => 'sent',
-                'sent_at' => now()
-            ]);
-
-            Notification::make()
-                ->title(__('Invitation Sent'))
-                ->body(__('An invitation has been successfully sent to :email.', ['email' => $validatedData['recipientEmail']]))
-                ->success()
-                ->send();
-        } catch (\Exception $e) {
-            $invitation->update(['status' => 'failed']);
-
-            Notification::make()
-                ->title(__('Error Sending Email'))
-                ->body(__('Could not send invitation to :email. Error: :message', ['email' => $validatedData['recipientEmail'], 'message' => $e->getMessage()]))
-                ->danger()
-                ->send();
-            // Log::error('Failed to send invitation email to ' . $validatedData['recipientEmail'] . ': ' . $e->getMessage());
+        if (!$invitation) {
+            $this->notifyError(__('Error'), __('Could not create invitation record.'));
+            $this->closeSendInvitationModal();
+            return;
         }
 
+        $emailSent = $this->_dispatchInvitationEmail($invitation, $currentLocale);
+        $this->_handleEmailDispatchResult($invitation, $emailSent, $validatedData['recipientEmail']);
+
         $this->closeSendInvitationModal();
-        $this->loadInvitationGroups();
-        // $this->dispatch('invitationSent'); // إذا كنت ستستخدم هذا الحدث
+        $this->loadInvitationGroups(); // Refresh the list
     }
 
-    public function render()
+    /**
+     * Create a new invitation record with a 'pending' status.
+     * @param string $email Recipient's email.
+     * @param string $locale Current application locale.
+     * @return Invitation|null The created Invitation object or null on failure.
+     */
+    private function _createPendingInvitation(string $email, string $locale): ?Invitation
+    {
+        try {
+            return Invitation::create([
+                'invitation_group_id' => $this->selectedGroup->id,
+                'email' => $email,
+                'token' => Str::random(32),
+                'status' => Invitation::STATUS_PENDING, // Assuming STATUS_PENDING constant exists in Invitation model
+                'language_code' => $locale,
+            ]);
+        } catch (Exception $e) {
+            Log::error("Failed to create invitation: " . $e->getMessage(), [
+                'email' => $email,
+                'group_id' => $this->selectedGroup->id,
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Dispatch the invitation email.
+     * @param Invitation $invitation The invitation record.
+     * @param string $currentLocale The locale to send the email in.
+     * @return bool True if email dispatch was attempted successfully (doesn't guarantee delivery), false otherwise.
+     */
+    private function _dispatchInvitationEmail(Invitation $invitation, string $currentLocale): bool
+    {
+        $recipientName = $currentLocale === 'ar' ? 'عزيزي المستخدم' : 'Dear User'; // Consider making this configurable or dynamic
+        // IMPORTANT: Replace 'survey.show' with your actual survey route and ensure it's defined.
+        $surveyLink = route('survey.show', ['token' => $invitation->token]);
+
+        try {
+            Mail::to($invitation->email)
+                ->locale($currentLocale) // Crucial for the Mailable to use the correct language
+                ->send(new PerformanceInvitationMail($invitation, $recipientName, $surveyLink, $currentLocale));
+            return true;
+        } catch (Exception $e) {
+            Log::error('Failed to send invitation email for invitation ID ' . $invitation->id . ': ' . $e->getMessage(), [
+                'email' => $invitation->email,
+                'exception' => $e
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Handle the result of the email dispatch attempt.
+     * Updates invitation status and sends notifications.
+     * @param Invitation $invitation The invitation record.
+     * @param bool $emailSent True if email dispatch was successful, false otherwise.
+     * @param string $recipientEmail Recipient's email for notification messages.
+     */
+    private function _handleEmailDispatchResult(Invitation $invitation, bool $emailSent, string $recipientEmail): void
+    {
+        if ($emailSent) {
+            $invitation->update([
+                'status' => Invitation::STATUS_SENT, // Assuming STATUS_SENT constant
+                'sent_at' => now()
+            ]);
+            $this->notifySuccess(
+                __('Invitation Sent'),
+                __('An invitation has been successfully sent to :email.', ['email' => $recipientEmail])
+            );
+        } else {
+            $invitation->update(['status' => Invitation::STATUS_FAILED]); // Assuming STATUS_FAILED constant
+            $this->notifyError(
+                __('Error Sending Email'),
+                __('Could not send invitation to :email. Please check logs for details.', ['email' => $recipientEmail])
+            );
+        }
+    }
+
+    /**
+     * Helper method to send a success notification.
+     * @param string $title
+     * @param string $body
+     */
+    private function notifySuccess(string $title, string $body): void
+    {
+        Notification::make()
+            ->title($title)
+            ->body($body)
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Helper method to send an error/danger notification.
+     * @param string $title
+     * @param string $body
+     */
+    private function notifyError(string $title, string $body): void
+    {
+        Notification::make()
+            ->title($title)
+            ->body($body)
+            ->danger()
+            ->send();
+    }
+
+    /**
+     * Render the component.
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function render(): \Illuminate\Contracts\View\View
     {
         return view('livewire.invitation-manager');
     }

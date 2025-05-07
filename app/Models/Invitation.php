@@ -9,6 +9,11 @@ class Invitation extends Model
 {
     use HasFactory;
 
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_SENT = 'sent';
+    public const STATUS_FAILED = 'failed';
+    public const STATUS_COMPLETED = 'completed';
+
     protected $fillable = [
         'invitation_group_id',
         'email',
@@ -30,10 +35,4 @@ class Invitation extends Model
     {
         return $this->belongsTo(InvitationGroup::class);
     }
-
-    // علاقة: الدعوة يمكن أن تكون مرسلة بواسطة مستخدم معين (اختياري، إذا أردت تتبع من أرسل الدعوة)
-    // public function inviter(): BelongsTo
-    // {
-    //     return $this->belongsTo(User::class, 'invited_by_user_id'); // ستحتاج لإضافة العمود invited_by_user_id في الـ migration
-    // }
 }

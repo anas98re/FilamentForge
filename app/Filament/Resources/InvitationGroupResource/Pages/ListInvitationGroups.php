@@ -13,7 +13,7 @@ class ListInvitationGroups extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->label(__('Register New Group')), // تغيير النص هنا
+            Actions\CreateAction::make()->label(__('Register New Group')), 
         ];
     }
 }

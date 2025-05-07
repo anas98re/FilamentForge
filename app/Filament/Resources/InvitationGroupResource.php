@@ -76,7 +76,7 @@ class InvitationGroupResource extends Resource
     {
         return [
             'index' => Pages\ListInvitationGroups::route('/'),
-            'create' => Pages\CreateInvitationGroup::route('/create'), // استخدم صفحتك المخصصة
+            'create' => Pages\CreateInvitationGroup::route('/create'), // i use my page
             'edit' => Pages\EditInvitationGroup::route('/{record}/edit'),
         ];
     }
