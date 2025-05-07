@@ -122,6 +122,19 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Supported Locales
+    |--------------------------------------------------------------------------
+    |
+    | Define the locales supported by your application.
+    |
+    */
+    'supported_locales' => [
+        'en' => 'English',
+        'ar' => 'العربية',
+    ],
+
     'key' => env('APP_KEY'),
 
     'cipher' => 'AES-256-CBC',
